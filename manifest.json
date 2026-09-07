@@ -1,0 +1,10 @@
+{
+  "id": "task-feature-library",
+  "name": "Task Feature Library",
+  "version": "0.2.2",
+  "minAppVersion": "1.5.0",
+  "description": "Adds independently toggleable task features, including parent task rollups and start-time highlighting.",
+  "author": "philsyr",
+  "authorUrl": "https://github.com/philsyr",
+  "isDesktopOnly": false
+}

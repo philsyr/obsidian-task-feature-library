@@ -1,0 +1,11 @@
+/* Task Feature Library ----------------------------------------------------- */
+
+/* Kept temporarily so markers from older releases stay invisible until cleanup. */
+.task-feature-library-parent-marker {
+  display: none !important;
+}
+
+/* The time itself is highlighted; the task row stays completely vanilla. */
+.task-feature-library-time-token {
+  color: var(--text-accent);
+}

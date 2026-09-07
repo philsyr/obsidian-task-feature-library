@@ -1,0 +1,41 @@
+{
+  "name": "task-feature-library",
+  "version": "0.2.2",
+  "description": "A modular Obsidian plugin for task-focused workflow features.",
+  "author": "philsyr",
+  "homepage": "https://github.com/philsyr/obsidian-task-feature-library#readme",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/philsyr/obsidian-task-feature-library.git"
+  },
+  "bugs": {
+    "url": "https://github.com/philsyr/obsidian-task-feature-library/issues"
+  },
+  "type": "module",
+  "main": "main.js",
+  "scripts": {
+    "dev": "node esbuild.config.mjs",
+    "build": "npm run typecheck && node esbuild.config.mjs production",
+    "format": "prettier --write . --ignore-path .gitignore",
+    "format:check": "prettier --check . --ignore-path .gitignore",
+    "typecheck": "tsc --noEmit --skipLibCheck",
+    "test": "vitest run"
+  },
+  "keywords": [
+    "obsidian",
+    "tasks",
+    "checkboxes"
+  ],
+  "license": "MIT",
+  "devDependencies": {
+    "@codemirror/state": "6.5.0",
+    "@codemirror/view": "6.38.6",
+    "@types/node": "^22.15.17",
+    "esbuild": "^0.25.5",
+    "jsdom": "^26.1.0",
+    "obsidian": "1.13.1",
+    "prettier": "^3.6.2",
+    "typescript": "^5.8.3",
+    "vitest": "^3.2.4"
+  }
+}
