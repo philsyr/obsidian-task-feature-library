@@ -1,7 +1,14 @@
 # Obsidian Task Feature Library
 
-A modular [Obsidian](https://obsidian.md) plugin that adds independently
-toggleable task enhancements while preserving Obsidian's native task styling.
+Keep nested task lists in sync and make scheduled tasks easier to scan in
+[Obsidian](https://obsidian.md). This TypeScript plugin adds automatic parent
+checkboxes and start-time highlighting, with an independent toggle for each
+feature.
+
+[![CI](https://github.com/philsyr/obsidian-task-feature-library/actions/workflows/ci.yml/badge.svg?branch=main)](https://github.com/philsyr/obsidian-task-feature-library/actions/workflows/ci.yml)
+
+[Install](#installation) · [Design](#design) · [Development](#development) ·
+[Report an issue](https://github.com/philsyr/obsidian-task-feature-library/issues)
 
 ## Features
 
@@ -15,6 +22,9 @@ becomes a parent when the checkbox tasks that follow it have a greater indent:
   - [x] Verify the build
   - [ ] Write the changelog
 ```
+
+Complete **Write the changelog**, and **Prepare the release** becomes `[x]`
+automatically. Reopen either child, and its parent becomes `[ ]` again.
 
 - The parent becomes `[x]` when all of its direct and nested child tasks are
   complete.
@@ -52,12 +62,31 @@ Open **Settings → Task Feature Library**. Each feature has its own toggle:
 Both features are enabled by default. Changes take effect without restarting
 Obsidian.
 
+## Design
+
+The plugin separates Markdown parsing, feature behavior, and Obsidian lifecycle
+management so the task rules can be tested independently of the app.
+
+| Area                | Implementation                                                                                                                                                                                                                                           |
+| ------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Task hierarchy      | [`src/core/task-tree.ts`](src/core/task-tree.ts) builds a tree from indentation and derives parent completion from its leaf tasks. It skips frontmatter and fenced code examples.                                                                        |
+| Focused edits       | The same core computes source ranges for checkbox changes, checks that edits are still valid, and applies them from the bottom up. Tests cover stale edits and preserved CRLF line endings.                                                              |
+| Feature composition | [`TaskFeature`](src/features/feature.ts) defines editor extensions, Reading View decoration, and cleanup. A [shared registry](src/features/registry.ts) drives both feature lifecycle and settings.                                                      |
+| App integration     | [`src/main.ts`](src/main.ts) activates features and refreshes views when settings change. [Parent synchronization](src/features/parent-tasks/feature.ts) uses editor transactions for open notes and vault processing for other modified Markdown files. |
+| Time highlighting   | [`src/features/timed-tasks/`](src/features/timed-tasks/) shares parsing rules between CodeMirror decorations and Reading View processing. Cleanup restores the original text when the feature is disabled.                                               |
+
+Task state stays in standard Markdown. Parent synchronization updates checkbox
+characters in the note; time highlighting changes the rendered time token.
+Obsidian's native checkbox styling is preserved.
+
 ## Installation
+
+Requires **Obsidian 1.5.0 or later**, as declared in the plugin manifest.
 
 ### From a release
 
 1. Download `main.js`, `manifest.json`, and `styles.css` from the latest
-   GitHub release.
+   [GitHub release](https://github.com/philsyr/obsidian-task-feature-library/releases/latest).
 2. Create this directory inside your vault:
 
    ```text
@@ -69,12 +98,12 @@ Obsidian.
 
 ### From source
 
-Node.js 20 or later is recommended.
+Use Node.js 20 to match the CI environment.
 
 ```bash
 git clone https://github.com/philsyr/obsidian-task-feature-library.git
 cd obsidian-task-feature-library
-npm install
+npm ci
 npm run build
 ```
 
@@ -84,25 +113,33 @@ the plugin directory shown above, then reload Obsidian.
 ## Development
 
 ```bash
-npm install
+npm ci
 npm run dev
 ```
 
-Available checks:
+`npm run dev` rebuilds `main.js` when source files change. Load the generated
+plugin in an Obsidian vault to try changes in the app.
+
+Run the same checks as [CI](.github/workflows/ci.yml):
 
 ```bash
 npm run format:check
-npm run typecheck
 npm test
 npm run build
 ```
 
-Each feature implements the `TaskFeature` interface and provides its editor
-extensions, Reading View processing, and cleanup behavior. Feature metadata
-and factories live in `src/features/registry.ts`; the settings screen is built
-from the same registry.
+The build runs TypeScript checking before bundling with esbuild. To check types
+on their own, run `npm run typecheck`.
 
-Contributions and bug reports are welcome.
+The [Vitest suite](tests/) covers task-tree parsing and updates, legacy-marker
+migration, valid and invalid time prefixes, feature composition, Reading View
+decoration and cleanup with jsdom, and CSS behavior. These are automated checks;
+changes to editor interaction should also be tried in Obsidian.
+
+To add a feature, implement `TaskFeature`, register it in
+`src/features/registry.ts`, and add tests for its rules and cleanup behavior.
+For bug reports, include the Obsidian and plugin versions, a minimal Markdown
+example, and whether the issue happens in the editor or Reading View.
 
 ## License
 
